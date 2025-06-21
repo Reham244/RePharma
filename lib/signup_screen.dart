@@ -12,13 +12,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
+
+  final RegExp emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Handle sign-up logic or store data
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Account created successfully!')),
       );
-      Navigator.pop(context); // Go back to login after successful sign-up
+      Navigator.pop(context);
     }
   }
 
@@ -55,19 +59,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   prefixIcon: Icon(Icons.email),
                 ),
                 validator: (value) {
-                  if (value!.isEmpty) return 'Enter your email';
-                  if (!value.contains('@')) return 'Invalid email format';
+                  if (value == null || value.isEmpty) {
+                    return 'Enter your email';
+                  }
+                  if (!emailRegex.hasMatch(value)) {
+                    return 'Enter a valid email address';
+                  }
                   return null;
                 },
               ),
               SizedBox(height: 20),
               TextFormField(
                 controller: passwordController,
-                obscureText: true,
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
                 ),
                 validator: (value) =>
                     value!.length < 6 ? 'Min. 6 characters' : null,
@@ -75,11 +95,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SizedBox(height: 20),
               TextFormField(
                 controller: confirmPasswordController,
-                obscureText: true,
+                obscureText: _obscureConfirm,
                 decoration: InputDecoration(
                   labelText: 'Confirm Password',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirm
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirm = !_obscureConfirm;
+                      });
+                    },
+                  ),
                 ),
                 validator: (value) =>
                     value != passwordController.text ? 'Passwords do not match' : null,
