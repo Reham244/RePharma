@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'signup_screen.dart'; 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'signup_screen.dart';
+import 'forgot_password_screen.dart';
 
 void main() => runApp(RePharmaApp());
 
@@ -23,9 +25,42 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool rememberMe = false;
 
-  void _login() {
+  @override
+  void initState() {
+    super.initState();
+    _loadCredentials();
+  }
+
+  Future<void> _loadCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      rememberMe = prefs.getBool('rememberMe') ?? false;
+      if (rememberMe) {
+        emailController.text = prefs.getString('email') ?? '';
+        passwordController.text = prefs.getString('password') ?? '';
+      }
+    });
+  }
+
+  Future<void> _saveCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (rememberMe) {
+      await prefs.setBool('rememberMe', true);
+      await prefs.setString('email', emailController.text);
+      await prefs.setString('password', passwordController.text);
+    } else {
+      await prefs.setBool('rememberMe', false);
+      await prefs.remove('email');
+      await prefs.remove('password');
+    }
+  }
+
+  void _login() async {
     if (_formKey.currentState!.validate()) {
+      await _saveCredentials();
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -90,7 +125,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: 10),
+                CheckboxListTile(
+                  title: Text("Remember Me"),
+                  value: rememberMe,
+                  onChanged: (value) {
+                    setState(() {
+                      rememberMe = value ?? false;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+                      );
+                    },
+                    child: Text('Forgot Password?'),
+                  ),
+                ),
+                SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
@@ -123,9 +181,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.teal[100],
-      appBar: AppBar(
-        title: Text('RePharma Home'),
-      ),
+      appBar: AppBar(title: Text('RePharma Home')),
       body: Center(
         child: Text(
           'Welcome to RePharma!',
