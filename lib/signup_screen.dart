@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
   @override
-  _SignUpScreenState createState() => _SignUpScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
@@ -12,88 +15,106 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Handle sign-up logic or store data
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('name', nameController.text);
+      await prefs.setString('email', emailController.text);
+      await prefs.setString('password', passwordController.text);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Account created successfully!')),
+        SnackBar(
+          content: const Text('Account created successfully!'),
+          backgroundColor: Colors.teal,
+        ),
       );
-      Navigator.pop(context); // Go back to login after successful sign-up
+
+      Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.teal[50],
-      appBar: AppBar(title: Text('Sign Up')),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Text('Create Account',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-              SizedBox(height: 30),
-              TextFormField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: 'Full Name',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
+      backgroundColor: Colors.teal.shade50,
+      appBar: AppBar(
+        title: const Text('Create Account'),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    const Icon(Icons.person_add, size: 60, color: Colors.teal),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Sign Up',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: Colors.teal[800],
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 24),
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Full Name',
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                      validator: (value) =>
+                          value == null || value.isEmpty ? 'Please enter your name' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: Icon(Icons.email),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Please enter your email';
+                        if (!value.contains('@')) return 'Invalid email format';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: Icon(Icons.lock),
+                      ),
+                      validator: (value) =>
+                          value != null && value.length < 6 ? 'Min. 6 characters' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: confirmPasswordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Confirm Password',
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                      validator: (value) =>
+                          value != passwordController.text ? 'Passwords do not match' : null,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _submit,
+                      child: const Text('Sign Up'),
+                    ),
+                  ],
                 ),
-                validator: (value) =>
-                    value!.isEmpty ? 'Please enter your name' : null,
               ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
-                validator: (value) {
-                  if (value!.isEmpty) return 'Enter your email';
-                  if (!value.contains('@')) return 'Invalid email format';
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
-                ),
-                validator: (value) =>
-                    value!.length < 6 ? 'Min. 6 characters' : null,
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock_outline),
-                ),
-                validator: (value) =>
-                    value != passwordController.text ? 'Passwords do not match' : null,
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                ),
-                child: Text('Sign Up', style: TextStyle(fontSize: 16)),
-              ),
-            ],
+            ),
           ),
         ),
       ),
