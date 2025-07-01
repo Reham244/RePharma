@@ -1,9 +1,10 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
+
 
 android {
     namespace = "com.example.repharma"
@@ -42,3 +43,34 @@ android {
 flutter {
     source = "../.."
 }
+
+buildscript {
+    repositories {
+        google()          // ✅ Required for Firebase plugins
+        mavenCentral()    // ✅ Also good for other dependencies
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.0.0'
+        classpath 'com.google.gms:google-services:4.3.15'  // ✅ Firebase Services
+    }
+}
+
+// For newer Flutter projects (Gradle 7+)
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// If your project uses this instead (Gradle 7.0+), keep this block too:
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'repharma'
+

@@ -1,0 +1,6 @@
+output: lib/firebase_options.dart
+
+platforms:
+  windows:
+    plugin_config:
+      cpp_sdk_path: D:/Firebase/firebase_cpp_sdk
