@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
@@ -12,15 +16,54 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Handle sign-up logic or store data
+  bool _isLoading = false;
+
+  Future<void> _submit() async {
+  if (_formKey.currentState!.validate()) {
+    setState(() => _isLoading = true);
+
+    try {
+      print('📨 Attempting to create user...');
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
+
+      final user = credential.user;
+      print('✅ User created: ${user?.uid}');
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .set({
+        'name': nameController.text.trim(),
+        'email': emailController.text.trim(),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      print('📝 User data saved to Firestore');
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Account created successfully!')),
       );
-      Navigator.pop(context); // Go back to login after successful sign-up
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      print('❌ FirebaseAuthException: ${e.code} - ${e.message}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Signup failed')),
+      );
+    } catch (e) {
+      print('❌ General signup error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Signup failed: $e')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -85,14 +128,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     value != passwordController.text ? 'Passwords do not match' : null,
               ),
               SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                ),
-                child: Text('Sign Up', style: TextStyle(fontSize: 16)),
-              ),
+              _isLoading
+                  ? CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 15),
+                      ),
+                      child: Text('Sign Up',
+                          style: TextStyle(fontSize: 16)),
+                    ),
             ],
           ),
         ),

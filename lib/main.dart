@@ -1,35 +1,69 @@
 import 'package:flutter/material.dart';
-import 'signup_screen.dart'; 
+import 'signup_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
 
-void main() => runApp(RePharmaApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const RePharmaApp());
+}
 
 class RePharmaApp extends StatelessWidget {
+  const RePharmaApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'RePharma',
       theme: ThemeData(primarySwatch: Colors.teal),
-      home: LoginScreen(),
+      home: const LoginScreen(),
     );
   }
 }
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void _login() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
+        if (!mounted) return;
+        print('✅ Login successful');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } on FirebaseAuthException catch (e) {
+        if (!mounted) return;
+        print('❌ FirebaseAuthException: ${e.code} - ${e.message}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: ${e.message}')),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        print('❌ General login error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: $e')),
+        );
+      }
     }
   }
 
@@ -39,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.teal[50],
       body: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
             child: Column(
@@ -53,10 +87,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.teal[800],
                   ),
                 ),
-                SizedBox(height: 40),
+                const SizedBox(height: 40),
                 TextFormField(
                   controller: emailController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Email',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
@@ -71,11 +105,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: passwordController,
                   obscureText: true,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Password',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.lock),
@@ -90,24 +124,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 15),
                   ),
-                  child: Text('Login', style: TextStyle(fontSize: 16)),
+                  child: const Text('Login', style: TextStyle(fontSize: 16)),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SignUpScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const SignUpScreen()),
                     );
                   },
-                  child: Text("Don't have an account? Sign Up"),
+                  child: const Text("Don't have an account? Sign Up"),
                 ),
               ],
             ),
@@ -119,14 +155,16 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.teal[100],
       appBar: AppBar(
-        title: Text('RePharma Home'),
+        title: const Text('RePharma Home'),
       ),
-      body: Center(
+      body: const Center(
         child: Text(
           'Welcome to RePharma!',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
