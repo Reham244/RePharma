@@ -3,6 +3,7 @@ import 'signup_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
+import 'medicine_search_screen.dart'; // 👈 New import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -164,10 +165,16 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('RePharma Home'),
       ),
-      body: const Center(
-        child: Text(
-          'Welcome to RePharma!',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const MedicineSearchScreen()),
+            );
+          },
+          child: const Text('Search Medicines'),
         ),
       ),
     );
