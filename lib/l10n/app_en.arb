@@ -1,0 +1,18 @@
+{
+  "welcome": "Welcome to RePharma!",
+  "favourites": "Favourites",
+  "searchMedicines": "Search Medicines",
+  "news": "News",
+  "about": "About",
+  "language": "Language",
+  "home": "Home",
+  "logout": "Logout",
+  "profile": "Profile",
+  "noUser": "No user",
+  "uid": "UID",
+  "medicineAlerts": "Medicine Alerts",
+  "contactUs": "Contact Us",
+  "userProfile": "User Profile",
+  "healthTipOfDay": "Health Tip of the Day",
+  "drinkWaterTip": "Drink enough water every day to stay healthy."
+}

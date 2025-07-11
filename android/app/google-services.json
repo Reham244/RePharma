@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "209354446525",
+    "project_id": "repharma-1d470",
+    "storage_bucket": "repharma-1d470.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:209354446525:android:0ba0901f8e2a638192c9d4",
+        "android_client_info": {
+          "package_name": "com.example.repharma"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq_yJVaRxLWxnL8Hhy2SAWQL-su18zc-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
