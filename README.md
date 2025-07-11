@@ -1,4 +1,4 @@
-# repharma
+# Repharma
 
 The idea behind RePharma is to create a seamless and intelligent solution for medication accessibility and management. The core concept revolves around providing users with an innovative platform that utilizes advanced technology to address the challenges of medication unavailability and accessibility.
 
